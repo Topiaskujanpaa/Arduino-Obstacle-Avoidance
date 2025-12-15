@@ -17,7 +17,7 @@
  * - Arduino Uno
  * - Servo (SG90): Pin 7
  * - Ultraääni anturi (HC-SR04): Trig 12, Echo 11
- * - Moottoriajurit: 2kpl L9110S
+ * - Moottoriajurit: L298N
  * 
  * kehitysympäristö: VS Code + PlatformIO
  */
