@@ -10,7 +10,7 @@ Tämä on sulautettu järjestelmäprojekti, jossa rakennetaan autonomisesti navi
 Projektin tavoitteena on demonstroida C++-ohjelmointitaitoja, sensoridatan käsittelyä ja logiikan toteutusta Arduinolla
 
 ### 💡 Nykyinen tila: "Visual Debugging"
-Koska moottoriajurit (L9110S) odottavat vielä asennusta, robotin aivot on ohjelmoitu **Visual Debugging** -tilaan. 
+Koska moottoriajuri (L298N) odottaa vielä asennusta, robotin aivot on ohjelmoitu **Visual Debugging** -tilaan. 
 * Moottoreiden sijaan robotti ohjaa LED-merkkivaloja.
 * Tämä mahdollistaa navigointilogiikan ja sensorien testaamisen turvallisesti pöydällä ennen liikkuvia osia.
 
@@ -44,12 +44,12 @@ Ultraäänianturin (HC-SR04) kiinnitys servomoottoriin on toteutettu **3D-tulost
 
 ### 🔌 Komponentit
 * **MCU:** Arduino Uno
-* **Virtalähde (Logiikka):** 9V Paristo (Arduino, sensorit, servo)
+* **Virtalähde (Logiikka):** 9V Paristo (Arduino, HC-SR04)
 * **Virtalähde (Moottorit):** Fulbat 6V 4Ah Akku
 * **Sensorit:** HC-SR04 Ultraääni (Trig: 12, Echo: 11)
 * **Toimilaitteet:** SG90 Servo (Pin 7)
 * **Runko:** 4WD Robottialusta (akryyli/metalli)
-* **Moottoriajurit:** L9110S
+* **Moottoriajuri:** L298N
 
 ---
 
@@ -65,7 +65,7 @@ Kytkennät toteutettu koekytkentälevylle (Breadboard) testausta varten.
 ![Kytkenät](https://github.com/user-attachments/assets/529d43b6-553a-4650-afc7-2e78efef399a)
 
 ### 3. Moottoriajureiden asennus (Tulossa)...
-Tämä vaihe suoritetaan heti, kun tilatut **L9110S-moottoriajurit** saapuvat. 
+Tämä vaihe suoritetaan heti, kun **L298N-moottoriajuri** saapuu. 
 * Väliaikaiset LED-kytkennät puretaan.
 * Moottoriajurit asennetaan runkoon ja kytketään DC-moottoreihin.
 * Koodi päivitetään ohjaamaan moottoreita LEDien sijaan.
