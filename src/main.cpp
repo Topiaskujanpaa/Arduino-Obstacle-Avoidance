@@ -2,7 +2,7 @@
 /*
  * Projekti: Autonominen esteitä väistävä robotti (4WD)
  * Tekijä: Topias Kujanpää
- * Päiväys: Joulukuu 2025
+ * Päiväys: Tammikuu 2026
  * 
  * Kuvaus:
  * Tämä ohjelma ohjaa autonomista robottia, joka väistelee esteitä
@@ -12,9 +12,9 @@
  * 
  * Laitteisto / Kytkennät (Pinout):
  * - Arduino Uno
- * - Servo (SG90): Pin 7
- * - Ultraääni anturi (HC-SR04): Trig 12, Echo 11
- * - Moottoriajuri: L298N
+ * - Servo (SG90)
+ * - Ultraääni anturi (HC-SR04)
+ * - Moottoriajurit: L298N
  * 
  * kehitysympäristö: VS Code + PlatformIO
  */
