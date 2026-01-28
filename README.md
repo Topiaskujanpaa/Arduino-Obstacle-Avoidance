@@ -1,31 +1,23 @@
 # 🤖 Autonominen Esteitä Väistävä Robotti (C++ / PlatformIO)
 
 **Tekijä:** Topias Kujanpää  
-**Status:** 🚧 Työn alla (Moottoriajureiden asennus seuraavaksi)  
 **Ympäristö:** VS Code + PlatformIO
 
 ## 📖 Projektin kuvaus
 Tämä on sulautettu järjestelmäprojekti, jossa rakennetaan autonomisesti navigoivaa robottia. Robotti havainnoi ympäristöään ultraäänianturilla ja tekee päätöksiä reitinvalinnasta reaaliaikaisesti.
-
 Projektin tavoitteena on demonstroida C++-ohjelmointitaitoja, sensoridatan käsittelyä ja logiikan toteutusta Arduinolla
 
-### 💡 Nykyinen tila: "Visual Debugging"
-Koska moottoriajuri (L298N) odottaa vielä asennusta, robotin aivot on ohjelmoitu **Visual Debugging** -tilaan. 
-* Moottoreiden sijaan robotti ohjaa LED-merkkivaloja.
-* Tämä mahdollistaa navigointilogiikan ja sensorien testaamisen turvallisesti pöydällä ennen liikkuvia osia.
-
----
-
-## 🎥 Demo: Logiikkatesti
+## 🎥 Demo:
 Alla olevalla videolla näkyy, kuinka robotti reagoi esteisiin, pysähtyy, skannaa ympäristön servolla ja päättää uuden suunnan.
-
 [Katso video YouTubessa (Lue kuvaus)!] (https://youtube.com/shorts/HBnDYzbjyys)
-
 **Värikoodit videolla:**
 * 🟢 **Vihreä:** Reitti vapaa (Aja eteenpäin)
 * 🔴 **Punainen:** Este edessä (Peruuta)
 * 🟡 **Keltainen:** Käänny (Vasen/Oikea esteen sijainnista riippuen)
 * 🟢🔴🟡🟡 **Kaikki:** Robotti on pysähtynyt.
+
+Tässä vielä video robotin toiminnasta, kun ajuri on asennettu:
+https://youtube.com/shorts/7eB4zP6gT3k?feature=share
 
 ---
 
@@ -64,11 +56,19 @@ Alusta ja moottorit asennettuna.
 Kytkennät toteutettu koekytkentälevylle (Breadboard) testausta varten.
 ![Kytkenät](https://github.com/user-attachments/assets/529d43b6-553a-4650-afc7-2e78efef399a)
 
-### 3. Moottoriajureiden asennus (Tulossa)...
-Tämä vaihe suoritetaan heti, kun **L298N-moottoriajuri** saapuu. 
-* Väliaikaiset LED-kytkennät puretaan.
-* Moottoriajurit asennetaan runkoon ja kytketään DC-moottoreihin.
-* Koodi päivitetään ohjaamaan moottoreita LEDien sijaan.
+### 3. Moottoriajureiden asennus
+Projektissa siirryttiin käyttämään **L298N** -moottoriajuria, koska se kestää paremmin kuormaa ja mahdollistaa neljän moottorin ohjauksen luotettavasti.
+* **Virranhallinta (Logic Power):** Järjestelmä käyttää 6V akkua. L298N-ajurin sisäinen 5V-regulaattori on ohitettu (jumper poistettu), ja ohjauselektroniikka ottaa 5V jännitteen suoraan Arduinosta. Tämä varmistaa vakaan toiminnan matalammalla akkujännitteellä.
+![IMG_E2276](https://github.com/user-attachments/assets/708c404d-0f5a-48d2-b35d-6648796abe27)
+
+## 🧠 Älykkyys ja Logiikka
+
+1.  **Ajo eteenpäin:** Robotti etenee, kunnes ultraäänianturi havaitsee esteen alle 25 cm päässä.
+2.  **Pysähtyminen:** Kun este havaitaan, moottorit pysähtyvät välittömästi. Tämän jälkeen robotti peruuttaa, jottei se jää umpikujaan jumiin.
+3.  **Skannaus:** Servo kääntää sensoria vasemmalle ja oikealle mitatakseen etäisyydet sivuilta.
+4.  **Päätöksenteko:** Algoritmi vertaa vasemman ja oikean puolen tilaa ja kääntää robotin sinne, missä on enemmän tilaa.
+5.  **Peruutus:** Jos molemmat suunnat ovat tukossa, robotti peruuttaa lisää ja yrittää uudelleen.
+
 
 
 
