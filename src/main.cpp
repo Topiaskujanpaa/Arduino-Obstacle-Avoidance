@@ -9,15 +9,12 @@
  * ultraäänianturin (HC-SR04) ja kääntyvän servon avulla.
  * Koodi sisältää tällä hetkellä logiikan esteentunnistukseen, ympäristön skannaukseen
  * ja reitinvalintaan.
- * HUOM: Robotin liikkeet on tällä hetkellä simuloitu LED-merkkivaloilla
- * (Visual Debugging), koska moottoriajurit odottaa päivitystä.
- * Itse ohjauslogiikka on kuitenkin täysin toimiva ja testattu.
  * 
  * Laitteisto / Kytkennät (Pinout):
  * - Arduino Uno
  * - Servo (SG90): Pin 7
  * - Ultraääni anturi (HC-SR04): Trig 12, Echo 11
- * - Moottoriajurit: 2kpl L9110S
+ * - Moottoriajuri: L298N
  * 
  * kehitysympäristö: VS Code + PlatformIO
  */
@@ -30,16 +27,20 @@ const int servoPin = 7;
 // HC-SR04
 const int trigPin = 12;
 const int echoPin = 11;
-const int MinEtaisyys = 15;
+const int MinEtaisyys = 20;
 const int MittaustenMaara = 4;
+const int MinEste = 25; // Kun etäisyys on tätä pienempi, este havaittu sivuilla
+int KaantymisIndexi = 0; // joka toinen käännös on pidempi -> ei pyöritä paikallaan
 
-// Moottoriohjaus (LEDit simuloivat moottoreita tällä hetkellä)
 
-const int LEDvas = 2;
-const int LEDoik = 3;
-const int LEDeteen = 4;
-const int LEDtaakse = 5;
+// Moottoriohjaus 
+// vasen puoli:
+const int IN1 = 8;
+const int IN2 = 9;
 
+// oikea puoli:
+const int IN3 = 5;
+const int IN4 = 6;
 
 // servon vakiot
 const int viive = 10; // viive asentojen välillä
@@ -113,8 +114,8 @@ bool VasenOK() {
     if (MittausIndexi == 10) {
       int x = mittaaEtaisyys();
       // Jos este löytyy, palauta false heti
-      if (x > 0 and x <= 10) {
-        delay(750);
+      if (x > 0 and x <= MinEste) {
+        delay(500);
         myservo.write(90);
         Serial.println("--------ESTE HAVAITTU VASEMMALLA----------");
         return false; 
@@ -146,12 +147,12 @@ bool OikeaOK() {
   for (int kulma = 180; kulma >= 110; kulma -= 1) {
 
     // Mitataan joka kymmenes askel
-    if (MittausIndexi == 10) {
+    if (MittausIndexi == MinEste) {
       int x = mittaaEtaisyys();
       // Jos este löytyy, palauta false heti
       // Etäisyyden täytyy olla suurempi kuin 0, koska HC-SR04 palauttaa 0 jos este on liian kauakana 
       if (x > 0 and x <= 10) {
-        delay(750);
+        delay(500);
         myservo.write(90);
         Serial.println("--------ESTE HAVAITTU OIKEALLA----------");
         return false; 
@@ -177,35 +178,76 @@ bool OikeaOK() {
 
 // AJOFUNKTIOT:
 
-void ajaTaakse() {
-  digitalWrite(LEDvas, LOW);
-  digitalWrite(LEDoik, LOW);
-  digitalWrite(LEDeteen, LOW);
-  digitalWrite(LEDtaakse, HIGH);  
-}
 void pysahdy() {
-  digitalWrite(LEDvas, HIGH);
-  digitalWrite(LEDoik, HIGH);
-  digitalWrite(LEDeteen, HIGH);
-  digitalWrite(LEDtaakse, HIGH);
+  // Pysäytys molemmille puolille
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
 }
+void ajaTaakse() {
+  // Vasen taaksepäin
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  
+  // Oikea taaksepäin
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+
+  delay(300); // liikutaan 700 ms ajan taaksepäin
+  pysahdy();
+  delay(500); // pieni tauko peruutuksen jälkeen
+}
+
 void ajaEteen() {
-  digitalWrite(LEDvas, LOW);
-  digitalWrite(LEDoik, LOW);
-  digitalWrite(LEDeteen, HIGH);
-  digitalWrite(LEDtaakse, LOW);
+// Vasen eteenpäin
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  
+  // Oikea eteenpäin
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+ 
 }
 void kaannyVasemmalle() {
-  digitalWrite(LEDvas, HIGH);
-  digitalWrite(LEDoik, LOW);
-  digitalWrite(LEDeteen, LOW);
-  digitalWrite(LEDtaakse, LOW);
+  // "Tankkikäännös": Vasen pakittaa, Oikea menee eteen
+  
+  // Vasen pakittaa
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+
+  // Oikea eteen
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  if (KaantymisIndexi % 2 == 0) {
+    delay(600); // käännytään 600 ms ajan
+  } else {
+    delay(400); // käännytään 400 ms ajan
+  }
+  pysahdy();
+  delay(500); // pieni tauko käännöksen jälkeen
+  KaantymisIndexi += 1;
 }
+  
+
 void kaannyOikealle() {
-  digitalWrite(LEDvas, LOW);
-  digitalWrite(LEDoik, HIGH);
-  digitalWrite(LEDeteen, LOW);
-  digitalWrite(LEDtaakse, LOW);
+  // "Tankkikäännös": Oikea pakittaa, Vasen menee eteen
+  
+  // Oikea pakittaa
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+
+  // Vasen eteen
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  if (KaantymisIndexi % 2 == 0) {
+    delay(600); // käännytään 600 ms ajan
+  } else {
+    delay(400); // käännytään 400 ms ajan
+  }
+  pysahdy();
+  delay(500); // pieni tauko käännöksen jälkeen
+  KaantymisIndexi += 1;
 }
 
 
@@ -217,11 +259,10 @@ void setup() {
   Serial.begin(9600);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-
-  pinMode(LEDeteen, OUTPUT);
-  pinMode(LEDtaakse, OUTPUT);
-  pinMode(LEDvas, OUTPUT);
-  pinMode(LEDoik, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
 
 
 
@@ -238,57 +279,53 @@ void loop() {
   // Jos etäisyys on liian pieni, pysähdytään ja tarkastetaan sivut
   if (etaisyys <= MinEtaisyys) {
     pysahdy();
-    delay(500);
+    delay(200);
+      // Ensin peruutetaan vähän
+    ajaTaakse();
+    delay(200);
+    pysahdy();
+    delay(50); // pieni tauko peruutuksen jälkeen
     bool v = VasenOK();
-    delay(100);
+    delay(60);
     bool o = OikeaOK();
     delay(1000);
     // jos molemmat sivut tukossa, peruutetaan ja yritetään uudestaan
     if (o == false and v == false) {
       Serial.println("-----Molemmat sivut tukossa, peruutetaan-----");
       ajaTaakse();
-      delay(1000); // liikutaan sekunnin ajan taaksepäin
-      pysahdy();
       // peruutetaan niin kauan kunnes toinen sivu on vapaa
       while (o == false and v == false) {
         v = VasenOK();
         if (v == true) {
           Serial.println("-----Vasen puoli vapaa, käännytään vasemmalle-----");
+          delay(400);
           kaannyVasemmalle();
-          delay(1000); // liikutaan sekunnin ajan vasemmalle
-          pysahdy();
           break;
         }
-        delay(100);
+        delay(300);
         o = OikeaOK();
         if (o == true) {
           Serial.println("-----Oikea puoli vapaa, käännytään oikealle-----");
+          delay(400);
           kaannyOikealle();
-          delay(1000); // liikutaan sekunnin ajan oikealle
-          pysahdy();
           break;
         }
-        delay(1000);
+        delay(500);
         Serial.println("-----Molemmat sivut edelleen tukossa, peruutetaan lisää-----");
         ajaTaakse();
-        delay(1000); // liikutaan sekunnin ajan taaksepäin
-        pysahdy();
       }
       // Jos oikea on vapaa, käännytään oikealle
     } else if (o == true and v == false) {
       Serial.println("-----Kaannytään OIKEALLE-----");
       kaannyOikealle();
-      delay(1000); // liikutaan sekunnin ajan oikealle
       // jos vasen on vapaa, käännytään vasemmalle
     } else if (v == true and o == false) {
       Serial.println("-----Kaannytään VASEMMALLE-----");
       kaannyVasemmalle();
-      delay(1000); // liikutaan sekunnin ajan vasemmalle
       // jos molemmat vapaat, jatketaan oikealle
     } else if (o == true and v == true) {
       Serial.println("-----Molemmat sivut vapaat, jatketaan oikealle-----");
       kaannyOikealle();
-      delay(1000); // liikutaan sekunnin ajan oikealle
       
     }
  
